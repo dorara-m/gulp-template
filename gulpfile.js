@@ -6,11 +6,6 @@ const fs = require('fs');
 const data = require('gulp-data');
 const path = require('path');
 
-// HTML
-const htmlhint = require('gulp-htmlhint');
-const w3cjs = require('gulp-w3cjs');
-const browserSyncSsi = require('browsersync-ssi');
-
 // CSS
 const sass = require('gulp-sass');
 const sassGlob = require('gulp-sass-glob');
@@ -18,6 +13,9 @@ const postcss = require('gulp-postcss');
 const flexBugsFixes = require('postcss-flexbugs-fixes');
 const autoprefixer = require('autoprefixer');
 const cleanCSS = require('gulp-clean-css');
+
+// js
+const babel = require('gulp-babel');
 
 // Image
 const imagemin = require('gulp-imagemin');
@@ -30,7 +28,6 @@ const changed = require('gulp-changed');
 const browserSync = require('browser-sync');
 const plumber = require('gulp-plumber');
 const notify = require('gulp-notify');
-const gulpif = require('gulp-if');
 
 
 /**
@@ -41,12 +38,13 @@ const src = {
   html: ['src/**/*.pug', '!src/**/_*.pug'],
   htmlWatch: 'src/**/*.pug',
   data: 'src/_data/',
-  css: 'src/**/*.scss',
-  js: './src/assets/js/site.js',
-  jsWatch: 'src/**/*.{js,vue}',
+  css: './src/assets/css/main.scss',
+  cssWatch: 'src/**/*.scss',
+  js: 'src/**/*.js',
   image: 'src/assets/img/**/*.{png,jpg,gif,svg,ico}',
   imageWatch: 'src/assets/img/**/*',
 };
+//　ここで指定したパスが↓dest時に引き継がれる
 
 /**
  * 公開用ディレクトリ
@@ -54,27 +52,24 @@ const src = {
 const dest = {
   root: 'htdocs/',
   image: 'htdocs/assets/img/',
-  js: 'htdocs/assets/js/',
+  css: 'htdocs/assets/css/',
 };
 
 
 function html() {
   // JSONファイルの読み込み。
-  const locals = {
-    site: JSON.parse(fs.readFileSync(`${src.data}site.json`)),
-  };
+  const locals = {};
   locals.ja = {
-    // 日本語サイト共通のデータです。
+    // 日本語サイト
     site: JSON.parse(fs.readFileSync(`${src.data}ja/site.json`)),
   };
-  locals.en = {
-    // 英語サイト共通のデータです。
-    site: JSON.parse(fs.readFileSync(`${src.data}en/site.json`)),
-  };
+  // locals.en = {
+  //   // 英語サイト
+  //   site: JSON.parse(fs.readFileSync(`${src.data}en/site.json`)),
+  // };
   return (
     gulp
       .src(src.html)
-      // エラーでタスクを止めない
       .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
       .pipe(
         data(file => {
@@ -101,29 +96,6 @@ function html() {
   );
 }
 
-/**
- * 公開用のHTMLファイルを解析して警告やエラーを通知します。
- */
-function htmlValidate() {
-  // 範囲を限定する場合は`products/`などと指定します。
-  const validateDir = '';
-  return gulp
-    .src([`${dest.root}${validateDir}**/*.html`, `!${dest.root}styleguide/**/*.html`])
-    .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
-    .pipe(htmlhint('.htmlhintrc'))
-    .pipe(htmlhint.reporter('htmlhint-stylish'))
-    .pipe(
-      w3cjs({
-        // Warningも表示する
-        // showInfo: true,
-      }),
-    )
-    .pipe(
-      htmlhint.failOnError({
-        suppress: true,
-      }),
-    );
-}
 
 /**
  * `.scss`を`.css`にコンパイルします。
@@ -135,9 +107,7 @@ function css() {
   ];
   return (
     gulp
-      .src(src.css, {
-        sourcemaps: isDevelopment,
-      })
+      .src(src.css)
       // globパターンでのインポート機能を追加
       .pipe(sassGlob())
       .pipe(
@@ -148,51 +118,33 @@ function css() {
       .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
       .pipe(postcss(plugins))
       .pipe(
-        gulpif(
-          isProduction,
-          cleanCSS({
-            compatibility: {
-              properties: {
-                // 0の単位を不必要な場合は削除する
-                zeroUnits: false,
-              },
+        cleanCSS({
+          // 圧縮せずに整形して出力する
+          format: 'beautify',
+          compatibility: {
+            properties: {
+              // 0の単位を不必要な場合は削除する
+              zeroUnits: false,
             },
-          }),
-        ),
-      )
-      .pipe(
-        gulpif(
-          isDevelopment,
-          cleanCSS({
-            // 圧縮せずに整形して出力する
-            format: 'beautify',
-            compatibility: {
-              properties: {
-                // 0の単位を不必要な場合は削除する
-                zeroUnits: false,
-              },
-            },
-          }),
-        ),
-      )
-      .pipe(
-        gulp.dest(dest.root, {
-          sourcemaps: isDevelopment,
+          },
         }),
+      )
+      .pipe(
+        gulp.dest(dest.css),
       )
       .pipe(browserSync.reload({ stream: true }))
   );
 }
 
 // babel
-function babel() {
+function js() {
   return gulp
     .src(src.js)
     .pipe(plumber({
       errorHandler: notify.onError('Error: <%= error.message %>')
       }))
     .pipe(babel())
-    .pipe(gulp.dest('htdocs/assets/scripts/'))
+    .pipe(gulp.dest(dest.root))
 }
 
 /**
@@ -255,13 +207,6 @@ function image() {
 function serve(done) {
   browserSync({
     server: {
-      // SSIを使用します。
-      middleware: [
-        browserSyncSsi({
-          baseDir: dest.root,
-          ext: '.html',
-        }),
-      ],
       baseDir: dest.root,
     },
     // 画面を共有するときにスクロールやクリックなどをミラーリングしたくない場合はfalseにします。
@@ -282,12 +227,8 @@ function serve(done) {
 function watch() {
   gulp.watch(src.htmlWatch, html);
   gulp.watch(src.imageWatch, image);
-  gulp.watch(src.ssi, ssi);
-  gulp.watch(src.css, css);
-  gulp.watch(src.jsWatch, js);
-  gulp.watch(src.svgSprite, svgSprite);
-  gulp.watch(src.styleguideWatch, styleguide);
-  gulp.watch(src.copy, copy);
+  gulp.watch(src.cssWatch, css);
+  gulp.watch(src.js, js);
 }
 
 
@@ -296,7 +237,6 @@ function watch() {
  * ローカルサーバーを起動し、リアルタイムに更新を反映させます。
  */
 exports.default = gulp.series(
-  clean,
   gulp.parallel(html, css, js, image),
   gulp.parallel(serve, watch),
 );
