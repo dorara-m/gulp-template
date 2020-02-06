@@ -1,9 +1,11 @@
 block variables
 //- include /_mixin/_all
 doctype html
+<!DOCTYPE html>
 html(lang="ja")
   head(prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# " + pageOgpType + ": http://ogp.me/ns/" + pageOgpType + "#")
     include /_partial/ja/_meta
+    //- 言語対応する場合
     //- include /_partial/_hreflang
     include /_partial/_style
 

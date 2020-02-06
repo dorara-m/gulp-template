@@ -1,14 +1,14 @@
-extend /_template/_layout
+extend /_template/ja/_layout
 append variables
   //- 変更可能
-  - var pageTitle= "";
-  //- - var pageDescription= ja.site.description;
+  - var pageTitle= "トップ";
+  - var pageDescription= "トップページ | " + ja.site.description;
   //- - var pageKeywords= ja.site.keywords;
   //- 任意
-  //- - var pageOgpTitle= pageTitle;
-  //- - var pageOgpImage= ja.site.ogpImage;
+  - var pageOgpTitle= pageTitle;
+  - var pageOgpImage= ja.site.ogpImage;
   - var pageOgpType= "website";
-  - var imgPath= "/assets/img/";
+  - var imgPath= site.imgPath;
 
 block content
   h1 トップページ

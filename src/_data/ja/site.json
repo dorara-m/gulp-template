@@ -1,3 +1,10 @@
 {
-  "name": "gulp-template-root"
+  "name": "サイト名",
+  "description": "サイトの概要",
+  "keywords": "サイトのキーワード1, サイトのキーワード2",
+  "ogpImage": "/ogp.jpg",
+  "fbAppId": "",
+  "fbAdmins": "",
+  "twitterCard": "summary_large_image",
+  "twitterSite": "@SiteAccount"
 }

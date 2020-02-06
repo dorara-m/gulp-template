@@ -58,7 +58,9 @@ const dest = {
 
 function html() {
   // JSONファイルの読み込み。
-  const locals = {};
+  const locals = {
+    site: JSON.parse(fs.readFileSync(`${src.data}/site.json`)),
+  };
   locals.ja = {
     // 日本語サイト
     site: JSON.parse(fs.readFileSync(`${src.data}ja/site.json`)),

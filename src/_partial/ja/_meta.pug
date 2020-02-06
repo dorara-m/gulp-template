@@ -1,4 +1,28 @@
+meta(charset="UTF-8")
+meta(name="viewport", content="width=device-width, initial-scale=1.0")
+meta(http-equiv="X-UA-Compatible", content="ie=edge")
+
 if pageTitle
   title #{pageTitle} | #{ja.site.name}
 else
   title #{ja.site.name}
+
+meta(name="description" content=pageDescription)
+meta(property="og:type" content=pageOgpType)
+meta(property="og:image" content=site.url + site.imgPath + "common" + pageOgpImage)
+meta(property="og:url" content=site.url + pageAbsolutePath)
+meta(property="og:description" content=pageDescription)
+meta(property="og:site_name" content=ja.site.name)
+meta(property="og:locale" content="ja")
+
+if ja.site.fbAppId
+  meta(property="fb:app_id" content=ja.site.fbAppId)
+else if ja.site.fbAdmins
+  meta(property="fb:admins" content=ja.site.fbAdmins)
+
+if ja.site.twitterCard
+  meta(name="twitter:card" content=ja.site.twitterCard)
+if ja.site.twitterSite
+  meta(name="twitter:site" content=ja.site.twitterSite)
+
+link(rel="shortcut icon", href=site.url + site.imgPath+ "common/favicon.ico", type="image/x-icon")
