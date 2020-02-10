@@ -36,7 +36,7 @@ const notify = require('gulp-notify');
 const src = {
   root: 'src/',
   html: ['src/**/*.pug', '!src/**/_*.pug'],
-  htmlWatch: 'src/**/*.pug',
+  htmlWatch: ['src/**/*.pug', 'src/_data/**/*.json'],
   data: 'src/_data/',
   css: './src/assets/css/main.scss',
   cssWatch: 'src/**/*.scss',
