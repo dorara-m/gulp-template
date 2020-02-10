@@ -82,7 +82,7 @@ function html() {
           return locals;
         }),
       )
-      .pipe(cache('html'))
+      // .pipe(cache('html'))
       .pipe(
         pug({
           // `locals`に渡したデータを各Pugファイルで取得できます。
