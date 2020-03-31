@@ -121,8 +121,8 @@ function css() {
       .pipe(postcss(plugins))
       .pipe(
         cleanCSS({
-          // 圧縮せずに整形して出力する
-          format: 'beautify',
+          // ↓圧縮するかしないか
+          // format: 'beautify',
           compatibility: {
             properties: {
               // 0の単位を不必要な場合は削除する
