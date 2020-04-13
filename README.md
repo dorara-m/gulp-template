@@ -7,5 +7,3 @@
 * scss -> css
 * es6 -> js
 * imgMin
-
-## おためし
